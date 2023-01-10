@@ -7,17 +7,18 @@
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg";
       flake = false;
     };
+    sf-compact = {
+      url = "https://devimages-cdn.apple.com/design/resources/download/SF-Compact.dmg";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, sf-pro }:
+  outputs = { self, nixpkgs, flake-utils, sf-pro, sf-compact }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-    in rec {
-      packages.sf-pro = pkgs.stdenv.mkDerivation {
-        name = "sf-pro";
-        version = "0.0.1";
+      makeAppleFont = (name: pkgName: src: pkgs.stdenv.mkDerivation {
+        inherit name src;
 
-        src = sf-pro;
         buildInputs = [ pkgs.undmg pkgs.p7zip ];
         setSourceRoot = "sourceRoot=`pwd`";
 
@@ -25,7 +26,7 @@
 
         installPhase = ''
           undmg $src
-          7z x 'SF Pro Fonts.pkg'
+          7z x '${pkgName}'
           7z x 'Payload~'
           mkdir -p $out/share/fonts
           mkdir -p $out/share/fonts/opentype
@@ -33,6 +34,11 @@
           mv Library/Fonts/*.otf $out/share/fonts/opentype
           mv Library/Fonts/*.ttf $out/share/fonts/truetype
         '';
+      });
+    in rec {
+      packages = {
+        sf-pro = makeAppleFont "sf-pro" "SF Pro Fonts.pkg" sf-pro;
+        sf-compact = makeAppleFont "sf-compact" "SF Compact Fonts.pkg" sf-compact;
       };
     }
   );
