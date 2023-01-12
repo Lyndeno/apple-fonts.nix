@@ -35,9 +35,33 @@
           mv Library/Fonts/*.ttf $out/share/fonts/truetype
         '';
       });
+      makeNerdAppleFont = (name: pkgName: src: pkgs.stdenv.mkDerivation {
+        inherit name src;
+
+        buildInputs = [ pkgs.undmg pkgs.p7zip pkgs.parallel pkgs.nerd-font-patcher ];
+        setSourceRoot = "sourceRoot=`pwd`";
+
+        dontUnpack = true;
+
+        buildPhase = ''
+          undmg $src
+          7z x '${pkgName}'
+          7z x 'Payload~'
+          find -name \*.ttf -o -name \*.otf -print0 | parallel -j $NIX_BUILD_CORES -0 nerd-font-patcher -c {}
+        '';
+
+        installPhase = ''
+          mkdir -p $out/share/fonts
+          mkdir -p $out/share/fonts/opentype
+          mkdir -p $out/share/fonts/truetype
+          find -name \*.otf -maxdepth 1 -exec {} $out/share/fonts/opentype/ \;
+          find -name \*.ttf -maxdepth 1 -exec {} $out/share/fonts/truetype/ \;
+        '';
+      });
     in rec {
       packages = {
         sf-pro = makeAppleFont "sf-pro" "SF Pro Fonts.pkg" sf-pro;
+        sf-pro-nerd = makeNerdAppleFont "sf-pro" "SF Pro Fonts.pkg" sf-pro;
         sf-compact = makeAppleFont "sf-compact" "SF Compact Fonts.pkg" sf-compact;
       };
     }
