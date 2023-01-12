@@ -28,22 +28,26 @@
   outputs = { self, nixpkgs, flake-utils, sf-pro, sf-compact, sf-mono, sf-arabic, ny }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
+      unpackPhase = pkgName: ''
+        undmg $src
+        7z x '${pkgName}'
+        7z x 'Payload~'
+      '';
+      commonInstall = ''
+        mkdir -p $out/share/fonts
+        mkdir -p $out/share/fonts/opentype
+        mkdir -p $out/share/fonts/truetype
+      '';
+      commonBuildInputs = with pkgs; [ undmg p7zip ];
       makeAppleFont = (name: pkgName: src: pkgs.stdenv.mkDerivation {
         inherit name src;
 
-        buildInputs = [ pkgs.undmg pkgs.p7zip ];
+        unpackPhase = unpackPhase pkgName;
+
+        buildInputs = commonBuildInputs;
         setSourceRoot = "sourceRoot=`pwd`";
 
-        unpackPhase = ''
-          undmg $src
-          7z x '${pkgName}'
-          7z x 'Payload~'
-        '';
-
-        installPhase = ''
-          mkdir -p $out/share/fonts
-          mkdir -p $out/share/fonts/opentype
-          mkdir -p $out/share/fonts/truetype
+        installPhase = commonInstall + ''
           find -name \*.otf -exec mv {} $out/share/fonts/opentype/ \;
           find -name \*.ttf -exec mv {} $out/share/fonts/truetype/ \;
         '';
@@ -51,23 +55,16 @@
       makeNerdAppleFont = (name: pkgName: src: pkgs.stdenv.mkDerivation {
         inherit name src;
 
-        buildInputs = [ pkgs.undmg pkgs.p7zip pkgs.parallel pkgs.nerd-font-patcher ];
-        setSourceRoot = "sourceRoot=`pwd`";
+        unpackPhase = unpackPhase pkgName;
 
-        unpackPhase  = ''
-          undmg $src
-          7z x '${pkgName}'
-          7z x 'Payload~'
-        '';
+        buildInputs = with pkgs; commonBuildInputs ++ [ parallel nerd-font-patcher ];
+        setSourceRoot = "sourceRoot=`pwd`";
 
         buildPhase = ''
           find -name \*.ttf -o -name \*.otf -print0 | parallel -j $NIX_BUILD_CORES -0 nerd-font-patcher -c {}
         '';
 
-        installPhase = ''
-          mkdir -p $out/share/fonts
-          mkdir -p $out/share/fonts/opentype
-          mkdir -p $out/share/fonts/truetype
+        installPhase = commonInstall + ''
           find -name \*.otf -maxdepth 1 -exec mv {} $out/share/fonts/opentype/ \;
           find -name \*.ttf -maxdepth 1 -exec mv {} $out/share/fonts/truetype/ \;
         '';
