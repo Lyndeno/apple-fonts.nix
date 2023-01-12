@@ -54,8 +54,8 @@
           mkdir -p $out/share/fonts
           mkdir -p $out/share/fonts/opentype
           mkdir -p $out/share/fonts/truetype
-          find -name \*.otf -maxdepth 1 -exec {} $out/share/fonts/opentype/ \;
-          find -name \*.ttf -maxdepth 1 -exec {} $out/share/fonts/truetype/ \;
+          find -name \*.otf -maxdepth 1 -exec mv {} $out/share/fonts/opentype/ \;
+          find -name \*.ttf -maxdepth 1 -exec mv {} $out/share/fonts/truetype/ \;
         '';
       });
     in rec {
