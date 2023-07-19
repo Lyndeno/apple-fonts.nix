@@ -35,7 +35,7 @@
           mv Library/Fonts/*.ttf $out/share/fonts/truetype
         '';
       });
-      makeNerdAppleFont = (name: pkgName: src: pkgs.stdenv.mkDerivation {
+      makeNerdAppleFont = (name: pkgName: src: pkgs.stdenvNoCC.mkDerivation {
         inherit name src;
 
         buildInputs = [ pkgs.undmg pkgs.p7zip pkgs.parallel pkgs.nerd-font-patcher ];
