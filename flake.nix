@@ -39,7 +39,7 @@
         mkdir -p $out/share/fonts/truetype
       '';
       commonBuildInputs = with pkgs; [ undmg p7zip ];
-      makeAppleFont = (name: pkgName: src: pkgs.stdenv.mkDerivation {
+      makeAppleFont = (name: pkgName: src: pkgs.stdenvNoCC.mkDerivation {
         inherit name src;
 
         unpackPhase = unpackPhase pkgName;
