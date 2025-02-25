@@ -24,7 +24,7 @@
   };
 
   outputs =
-    inputs:
+    inputs@{self, ...}:
     let
       systems = [
         "aarch64-darwin"
@@ -92,7 +92,7 @@
 
               buildPhase = ''
                 runHook preBuild
-                find -name \*.ttf -o -name \*.otf -print0 | parallel -j $NIX_BUILD_CORES -0 nerd-font-patcher -c {}
+                find -name \*.ttf -o -name \*.otf -print0 | parallel --will-cite -j $NIX_BUILD_CORES -0 nerd-font-patcher --no-progressbars -c {}
                 runHook postBuild
               '';
 
@@ -124,5 +124,8 @@
           ny-nerd = makeNerdAppleFont "ny-nerd" "NY Fonts.pkg" inputs.ny;
         }
       );
+      hydraJobs = {
+        inherit (self) packages;
+      };
     };
 }
