@@ -17,6 +17,18 @@
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Arabic.dmg";
       flake = false;
     };
+    sf-armenian = {
+      url = "https://devimages-cdn.apple.com/design/resources/download/SF-Armenian.dmg";
+      flake = false;
+    };
+    sf-georgian = {
+      url = "https://devimages-cdn.apple.com/design/resources/download/SF-Georgian.dmg";
+      flake = false;
+    };
+    sf-hebrew = {
+      url = "https://devimages-cdn.apple.com/design/resources/download/SF-Hebrew.dmg";
+      flake = false;
+    };
     ny = {
       url = "https://devimages-cdn.apple.com/design/resources/download/NY.dmg";
       flake = false;
@@ -119,6 +131,15 @@
 
           sf-arabic = makeAppleFont "sf-arabic" "SF Arabic Fonts.pkg" inputs.sf-arabic;
           sf-arabic-nerd = makeNerdAppleFont "sf-arabic-nerd" "SF Arabic Fonts.pkg" inputs.sf-arabic;
+
+          sf-armenian = makeAppleFont "sf-armenian" "SF Armenian Fonts.pkg" inputs.sf-armenian;
+          sf-armenian-nerd = makeNerdAppleFont "sf-armenian-nerd" "SF Armenian Fonts.pkg" inputs.sf-armenian;
+          
+          sf-georgian = makeAppleFont "sf-georgian" "SF Georgian Fonts.pkg" inputs.sf-georgian;
+          sf-georgian-nerd = makeNerdAppleFont "sf-georgian-nerd" "SF Georgian Fonts.pkg" inputs.sf-georgian;
+          
+          sf-hebrew = makeAppleFont "sf-hebrew" "SF Hebrew Fonts.pkg" inputs.sf-hebrew;
+          sf-hebrew-nerd = makeNerdAppleFont "sf-hebrew-nerd" "SF Hebrew Fonts.pkg" inputs.sf-hebrew;
 
           ny = makeAppleFont "ny" "NY Fonts.pkg" inputs.ny;
           ny-nerd = makeNerdAppleFont "ny-nerd" "NY Fonts.pkg" inputs.ny;
