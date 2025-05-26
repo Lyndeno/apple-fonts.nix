@@ -16,7 +16,6 @@
 
   # San Francisco Fonts | Apple Fonts
   inputs.apple-fonts.url= "github:Lyndeno/apple-fonts.nix";
-  inputs.apple-fonts.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = { self, nixpkgs, apple-fonts.nix }: {
     nixosConfigurations = {
