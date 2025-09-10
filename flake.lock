@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1740828860,
-        "narHash": "sha256-cjbHI+zUzK5CPsQZqMhE3npTyYFt9tJ3+ohcfaOF/WM=",
+        "lastModified": 1757347588,
+        "narHash": "sha256-tLdkkC6XnsY9EOZW9TlpesTclELy8W7lL2ClL+nma8o=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "303bd8071377433a2d8f76e684ec773d70c5b642",
+        "rev": "b599843bad24621dcaa5ab60dac98f9b0eb1cabe",
         "type": "github"
       },
       "original": {
@@ -68,7 +68,7 @@
     "sf-compact": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-VMCf2Mhmx/qhLRQxlTAsQWxtonS27kPW+oTYBBRWHMg=",
+        "narHash": "sha256-GeODpgLiozMn0lTug420BD6stpt1ik/kycFSquwXs6o=",
         "type": "file",
         "url": "https://devimages-cdn.apple.com/design/resources/download/SF-Compact.dmg"
       },
@@ -116,7 +116,7 @@
     "sf-pro": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-RX6X2ltVE88Hp1g9tpSywMT3UfdLpRxgw92KRpiAues=",
+        "narHash": "sha256-jvXAmlHzrbYYMvc4Vk4bLW+RYe3XuQJ2qSXcasa72EU=",
         "type": "file",
         "url": "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg"
       },
