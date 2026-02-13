@@ -1,0 +1,82 @@
+name: "Build all flake outputs"
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  get-packages:
+    runs-on: ubuntu-latest
+    outputs:
+      x86_64-linux-regular: ${{ steps.parse.outputs.x86_64-linux-regular }}
+      x86_64-linux-nerd: ${{ steps.parse.outputs.x86_64-linux-nerd }}
+      x86_64-darwin-regular: ${{ steps.parse.outputs.x86_64-darwin-regular }}
+      x86_64-darwin-nerd: ${{ steps.parse.outputs.x86_64-darwin-nerd }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Parse flake packages
+        id: parse
+        run: |
+          for system in x86_64-linux x86_64-darwin; do
+            ALL_PACKAGES=$(nix eval --json .#packages.$system --apply builtins.attrNames)
+            REGULAR_PACKAGES=$(echo "$ALL_PACKAGES" | jq -r '.[] | select(test("-nerd$") | not) | ".#" + .' | tr '\n' ' ')
+            NERD_PACKAGES=$(echo "$ALL_PACKAGES" | jq -r '.[] | select(test("-nerd$")) | ".#" + .' | tr '\n' ' ')
+            
+            echo "${system//-/_}-regular=$REGULAR_PACKAGES" >> $GITHUB_OUTPUT
+            echo "${system//-/_}-nerd=$NERD_PACKAGES" >> $GITHUB_OUTPUT
+          done
+
+  build-regular-fonts:
+    needs: get-packages
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        include:
+          - os: ubuntu-latest
+            system: x86_64-linux
+            packages: ${{ needs.get-packages.outputs.x86_64-linux-regular }}
+          - os: macos-latest
+            system: x86_64-darwin
+            packages: ${{ needs.get-packages.outputs.x86_64-darwin-regular }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+        with:
+          enable-cache: true
+      - name: Build regular fonts for ${{ matrix.system }}
+        run: |
+          if [ -n "${{ matrix.packages }}" ]; then
+            nix build ${{ matrix.packages }} --system ${{ matrix.system }}
+          fi
+
+  build-nerd-fonts:
+    needs: [get-packages, build-regular-fonts]
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        include:
+          - os: ubuntu-latest
+            system: x86_64-linux
+            packages: ${{ needs.get-packages.outputs.x86_64-linux-nerd }}
+          - os: macos-latest
+            system: x86_64-darwin
+            packages: ${{ needs.get-packages.outputs.x86_64-darwin-nerd }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+        with:
+          enable-cache: true
+      - name: Build nerd fonts for ${{ matrix.system }}
+        run: |
+          if [ -n "${{ matrix.packages }}" ]; then
+            nix build ${{ matrix.packages }} --system ${{ matrix.system }}
+          fi
