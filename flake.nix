@@ -146,7 +146,10 @@
         }
       );
       hydraJobs = {
-        inherit (self) packages;
+        packages = {
+          # hydra does not hac Mac runners connected
+          inherit (self.packages) x86_64-linux aarch64-linux;
+        };
       };
     };
 }
