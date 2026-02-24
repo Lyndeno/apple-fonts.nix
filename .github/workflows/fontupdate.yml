@@ -1,4 +1,4 @@
-name: Update Nixpkgs Input
+name: Update Font Inputs
 
 on:
   schedule:
