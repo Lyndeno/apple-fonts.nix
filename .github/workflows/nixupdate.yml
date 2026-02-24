@@ -1,0 +1,32 @@
+name: Update Nixpkgs Input
+
+on:
+  schedule:
+    # Every June and December
+    - cron: '5 3 1 6,12 0'
+
+  workflow_dispatch:
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            extra-platforms = aarch64-linux arm-linux
+      - name: Update Nix Flake Inputs
+        run: nix flake update nixpkgs
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8.1.0
+        with:
+          token: ${{ secrets.PTOKEN }}
+          base: master
+          branch: update/flake-update
+          delete-branch: true
+          commit-message: Update flake.lock
+          title: Update flake.lock
