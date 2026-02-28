@@ -5,28 +5,28 @@ pull_request_rules:
       - or:
         - title=Update nixpkgs
         - title=Update fonts
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.ny-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-arabic-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-armenian-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-compact-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-georgian-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-hebrew-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-mono-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-pro-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.ny-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-arabic-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-armenian-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-compact-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-georgian-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-hebrew-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-mono-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-pro-nerd"
     actions:
       merge:
         method: merge
   - name: Automatically merge dependabot updates
     conditions:
       - author=dependabot
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.ny-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-arabic-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-armenian-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-compact-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-georgian-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-hebrew-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-mono-nerd"
-      - "check-success*=ci/hydra:apple-fonts:*:x86_64-linux.sf-pro-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.ny-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-arabic-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-armenian-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-compact-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-georgian-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-hebrew-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-mono-nerd"
+      - "check-success*=ci/hydra:apple-fonts:*:packages.x86_64-linux.sf-pro-nerd"
     actions:
       merge:
         method: merge
