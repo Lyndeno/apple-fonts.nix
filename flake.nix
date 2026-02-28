@@ -54,8 +54,8 @@
 
           unpackPhase = pkgName: ''
             runHook preUnpack
-            undmg $src
-            7z x '${pkgName}'
+            7z x $src
+            7z x './*/${pkgName}'
             7z x 'Payload~'
             runHook postUnpack
           '';
@@ -66,7 +66,7 @@
             mkdir -p "$out/share/fonts/truetype"
           '';
 
-          commonBuildInputs = builtins.attrValues { inherit (pkgs) undmg p7zip; };
+          commonBuildInputs = builtins.attrValues { inherit (pkgs) p7zip; };
 
           makeAppleFont = (
             name: pkgName: src:
