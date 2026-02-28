@@ -28,5 +28,5 @@ jobs:
           base: master
           branch: update/flake-update
           delete-branch: true
-          commit-message: Update flake.lock
-          title: Update flake.lock
+          commit-message: Update fonts
+          title: Update fonts
