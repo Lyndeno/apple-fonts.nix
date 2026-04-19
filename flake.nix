@@ -66,6 +66,13 @@
             mkdir -p "$out/share/fonts/truetype"
           '';
 
+          commonHydraProducts = ''
+            mkdir -p "$out/nix-support"
+            for f in "$out/share/fonts/opentype/"* "$out/share/fonts/truetype/"*; do
+              [ -f "$f" ] && echo "file font $f" >> "$out/nix-support/hydra-build-products"
+            done
+          '';
+
           commonBuildInputs = builtins.attrValues { inherit (pkgs) p7zip; };
 
           makeAppleFont = (
@@ -85,6 +92,7 @@
                   find -name \*.otf -exec mv {} "$out/share/fonts/opentype/" \;
                   find -name \*.ttf -exec mv {} "$out/share/fonts/truetype/" \;
                 ''
+                + commonHydraProducts
                 + ''runHook preInstall'';
             }
           );
@@ -115,6 +123,7 @@
                   find -name \*.otf -maxdepth 1 -exec mv {} "$out/share/fonts/opentype/" \;
                   find -name \*.ttf -maxdepth 1 -exec mv {} "$out/share/fonts/truetype/" \;
                 ''
+                + commonHydraProducts
                 + ''runHook preInstall'';
             }
           );
