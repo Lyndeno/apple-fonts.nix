@@ -36,7 +36,7 @@
   };
 
   outputs =
-    inputs@{self, ...}:
+    inputs@{ self, ... }:
     let
       systems = [
         "aarch64-darwin"
@@ -61,93 +61,78 @@
           '';
 
           commonInstall = ''
-            mkdir -p "$out/share/fonts"
             mkdir -p "$out/share/fonts/opentype"
             mkdir -p "$out/share/fonts/truetype"
           '';
 
-          commonBuildInputs = builtins.attrValues { inherit (pkgs) p7zip; };
+          commonHydraProducts = ''
+            mkdir -p "$out/nix-support"
+            for f in "$out/share/fonts/opentype/"* "$out/share/fonts/truetype/"*; do
+              [ -f "$f" ] && echo "file font $f" >> "$out/nix-support/hydra-build-products"
+            done
+          '';
 
-          makeAppleFont = (
-            name: pkgName: src:
-            pkgs.stdenvNoCC.mkDerivation {
-              inherit name src;
-
-              unpackPhase = unpackPhase pkgName;
-
-              buildInputs = commonBuildInputs;
-              setSourceRoot = "sourceRoot=`pwd`";
-
-              installPhase =
-                ''runHook preInstall''
-                + commonInstall
-                + ''
-                  find -name \*.otf -exec mv {} "$out/share/fonts/opentype/" \;
-                  find -name \*.ttf -exec mv {} "$out/share/fonts/truetype/" \;
-                ''
-                + ''runHook preInstall'';
-            }
-          );
-
-          makeNerdAppleFont = (
-            name: pkgName: src:
+          makeAppleFont =
+            name: pkgName: src: nerd:
             pkgs.stdenvNoCC.mkDerivation {
               inherit name src;
 
               unpackPhase = unpackPhase pkgName;
 
               buildInputs =
-                commonBuildInputs
-                ++ builtins.attrValues { inherit (pkgs) parallel nerd-font-patcher; };
+                [ pkgs.p7zip ]
+                ++ pkgs.lib.optionals nerd [
+                  pkgs.parallel
+                  pkgs.nerd-font-patcher
+                ];
 
               setSourceRoot = "sourceRoot=`pwd`";
 
-              buildPhase = ''
+              buildPhase = pkgs.lib.optionalString nerd ''
                 runHook preBuild
-                find -name \*.ttf -o -name \*.otf -print0 | parallel --will-cite -j $NIX_BUILD_CORES -0 nerd-font-patcher --no-progressbars -c {}
+                find \( -name \*.ttf -o -name \*.otf \) -print0 | parallel --will-cite -j $NIX_BUILD_CORES -0 nerd-font-patcher --no-progressbars -c {}
                 runHook postBuild
               '';
 
               installPhase =
                 ''runHook preInstall''
                 + commonInstall
-                + ''
-                  find -name \*.otf -maxdepth 1 -exec mv {} "$out/share/fonts/opentype/" \;
-                  find -name \*.ttf -maxdepth 1 -exec mv {} "$out/share/fonts/truetype/" \;
-                ''
-                + ''runHook preInstall'';
-            }
-          );
+                + (
+                  if nerd then ''
+                    find -name \*.otf -maxdepth 1 -exec mv {} "$out/share/fonts/opentype/" \;
+                    find -name \*.ttf -maxdepth 1 -exec mv {} "$out/share/fonts/truetype/" \;
+                  '' else ''
+                    find -name \*.otf -exec mv {} "$out/share/fonts/opentype/" \;
+                    find -name \*.ttf -exec mv {} "$out/share/fonts/truetype/" \;
+                  ''
+                )
+                + commonHydraProducts
+                + ''runHook postInstall'';
+            };
+
+          fontDefs = [
+            { name = "sf-pro";      pkgName = "SF Pro Fonts.pkg";      input = inputs.sf-pro; }
+            { name = "sf-compact";  pkgName = "SF Compact Fonts.pkg";  input = inputs.sf-compact; }
+            { name = "sf-mono";     pkgName = "SF Mono Fonts.pkg";     input = inputs.sf-mono; }
+            { name = "sf-arabic";   pkgName = "SF Arabic Fonts.pkg";   input = inputs.sf-arabic; }
+            { name = "sf-armenian"; pkgName = "SF Armenian Fonts.pkg"; input = inputs.sf-armenian; }
+            { name = "sf-georgian"; pkgName = "SF Georgian Fonts.pkg"; input = inputs.sf-georgian; }
+            { name = "sf-hebrew";   pkgName = "SF Hebrew Fonts.pkg";   input = inputs.sf-hebrew; }
+            { name = "ny";          pkgName = "NY Fonts.pkg";          input = inputs.ny; }
+          ];
         in
-        {
-          sf-pro = makeAppleFont "sf-pro" "SF Pro Fonts.pkg" inputs.sf-pro;
-          sf-pro-nerd = makeNerdAppleFont "sf-pro-nerd" "SF Pro Fonts.pkg" inputs.sf-pro;
-
-          sf-compact = makeAppleFont "sf-compact" "SF Compact Fonts.pkg" inputs.sf-compact;
-          sf-compact-nerd = makeNerdAppleFont "sf-compact-nerd" "SF Compact Fonts.pkg" inputs.sf-compact;
-
-          sf-mono = makeAppleFont "sf-mono" "SF Mono Fonts.pkg" inputs.sf-mono;
-          sf-mono-nerd = makeNerdAppleFont "sf-mono-nerd" "SF Mono Fonts.pkg" inputs.sf-mono;
-
-          sf-arabic = makeAppleFont "sf-arabic" "SF Arabic Fonts.pkg" inputs.sf-arabic;
-          sf-arabic-nerd = makeNerdAppleFont "sf-arabic-nerd" "SF Arabic Fonts.pkg" inputs.sf-arabic;
-
-          sf-armenian = makeAppleFont "sf-armenian" "SF Armenian Fonts.pkg" inputs.sf-armenian;
-          sf-armenian-nerd = makeNerdAppleFont "sf-armenian-nerd" "SF Armenian Fonts.pkg" inputs.sf-armenian;
-          
-          sf-georgian = makeAppleFont "sf-georgian" "SF Georgian Fonts.pkg" inputs.sf-georgian;
-          sf-georgian-nerd = makeNerdAppleFont "sf-georgian-nerd" "SF Georgian Fonts.pkg" inputs.sf-georgian;
-          
-          sf-hebrew = makeAppleFont "sf-hebrew" "SF Hebrew Fonts.pkg" inputs.sf-hebrew;
-          sf-hebrew-nerd = makeNerdAppleFont "sf-hebrew-nerd" "SF Hebrew Fonts.pkg" inputs.sf-hebrew;
-
-          ny = makeAppleFont "ny" "NY Fonts.pkg" inputs.ny;
-          ny-nerd = makeNerdAppleFont "ny-nerd" "NY Fonts.pkg" inputs.ny;
-        }
+        pkgs.lib.foldl' (
+          acc: f:
+          acc
+          // {
+            ${f.name} = makeAppleFont f.name f.pkgName f.input false;
+            "${f.name}-nerd" = makeAppleFont "${f.name}-nerd" f.pkgName f.input true;
+          }
+        ) { } fontDefs
       );
       hydraJobs = {
         packages = {
-          # hydra does not hac Mac runners connected
+          # hydra does not have Mac runners connected
           inherit (self.packages) x86_64-linux aarch64-linux;
         };
       };
