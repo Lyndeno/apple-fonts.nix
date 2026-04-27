@@ -11,7 +11,7 @@
       enabled = 1;
       hidden = false;
       description = "PR ${num}: ${info.title}";
-      checkinterval = 60;
+      checkinterval = 300;
       schedulingshares = 20;
       enableemail = false;
       emailoverride = "";
