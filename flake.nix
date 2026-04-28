@@ -95,7 +95,9 @@
               '';
 
               installPhase =
-                ''runHook preInstall''
+                ''
+                  runHook preInstall
+                ''
                 + commonInstall
                 + (
                   if nerd then ''
