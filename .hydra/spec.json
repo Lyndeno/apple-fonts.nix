@@ -1,35 +1,45 @@
 {
-  "enabled": 1,
-  "hidden": false,
-  "description": "jobset evaluation",
-  "nixexprinput": "nixexpr",
-  "nixexprpath": ".hydra/jobsets.nix",
   "checkinterval": 300,
-  "schedulingshares": 100,
-  "enableemail": false,
+  "description": "Jobset evaluation for Lyndeno/apple-fonts.nix",
   "emailoverride": "",
-  "keepnr": 1,
-  "type": 0,
+  "enabled": 1,
+  "enableemail": false,
+  "hidden": false,
   "inputs": {
     "nixexpr": {
-      "value": "https://github.com/Lyndeno/apple-fonts.nix master",
+      "emailresponsible": false,
       "type": "git",
-      "emailresponsible": false
+      "value": "https://github.com/Lyndeno/ci master"
     },
     "nixpkgs": {
-      "value": "https://github.com/NixOS/nixpkgs 641d909c4a7538f1539da9240dedb1755c907e40",
+      "emailresponsible": false,
       "type": "git",
-      "emailresponsible": false
+      "value": "https://github.com/NixOS/nixpkgs nixos-unstable"
     },
-    "refs": {
-      "type": "github_refs",
-      "value": "Lyndeno apple-fonts.nix heads",
-      "emailresponsible": false
+    "owner": {
+      "emailresponsible": false,
+      "type": "string",
+      "value": "Lyndeno"
     },
     "pulls": {
+      "emailresponsible": false,
       "type": "githubpulls",
-      "value": "Lyndeno apple-fonts.nix",
-      "emailresponsible": false
+      "value": "Lyndeno apple-fonts.nix"
+    },
+    "refs": {
+      "emailresponsible": false,
+      "type": "github_refs",
+      "value": "Lyndeno apple-fonts.nix heads"
+    },
+    "repo": {
+      "emailresponsible": false,
+      "type": "string",
+      "value": "apple-fonts.nix"
     }
-  }
+  },
+  "keepnr": 1,
+  "nixexprinput": "nixexpr",
+  "nixexprpath": "hydra/jobsets.nix",
+  "schedulingshares": 100,
+  "type": 0
 }

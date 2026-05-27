@@ -1,6 +1,9 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    ci.url = "github:Lyndeno/ci";
+    ci.inputs.nixpkgs.follows = "nixpkgs";
     sf-pro = {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg";
       flake = false;
@@ -36,12 +39,10 @@
   };
 
   outputs =
-    inputs@{ self, ... }:
+    inputs@{ self, ci, ... }:
     let
       systems = [
-        "aarch64-darwin"
         "aarch64-linux"
-        "x86_64-darwin"
         "x86_64-linux"
       ];
       forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
@@ -131,12 +132,40 @@
             "${f.name}-nerd" = makeAppleFont "${f.name}-nerd" f.pkgName f.input true;
           }
         ) { } fontDefs
+        // {
+          hydra-spec = ci.lib.mkHydraSpec {
+            inherit pkgs;
+            owner = "Lyndeno";
+            repo = "apple-fonts.nix";
+          };
+          mergify = ci.lib.mkMergifyConfig {
+            inherit pkgs;
+            projectName = "apple-fonts";
+            checks = self.checks;
+          };
+        }
       );
-      hydraJobs = {
-        packages = {
-          # hydra does not have Mac runners connected
-          inherit (self.packages) x86_64-linux aarch64-linux;
-        };
-      };
+      checks = forEachSystem (
+        system:
+        let
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
+        in
+        # All packages become checks so Hydra builds every font.
+        # The ci-specific entries override the package versions with
+        # proper check derivations.
+        self.packages.${system}
+        // {
+          hydra-spec = ci.lib.mkHydraCheck {
+            inherit pkgs;
+            specPackage = self.packages.${system}.hydra-spec;
+            specFile = ./.hydra/spec.json;
+          };
+          mergify-check = ci.lib.mkMergifyCheck {
+            inherit pkgs;
+            mergifyPackage = self.packages.${system}.mergify;
+            mergifyFile = ./.mergify.yml;
+          };
+        }
+      );
     };
 }
