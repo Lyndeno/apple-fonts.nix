@@ -44,8 +44,16 @@
       systems = [
         "aarch64-linux"
         "x86_64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+
+      hydraSystems = [
+        "aarch64-linux"
+        "x86_64-linux"
       ];
       forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
+      forEachHydraSystem = inputs.nixpkgs.lib.genAttrs hydraSystems;
     in
     {
       packages = forEachSystem (
@@ -145,7 +153,7 @@
           };
         }
       );
-      checks = forEachSystem (
+      checks = forEachHydraSystem (
         system:
         let
           pkgs = inputs.nixpkgs.legacyPackages.${system};
