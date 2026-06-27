@@ -38,53 +38,94 @@
     };
   };
 
-  outputs =
-    inputs@{ self, ci, ... }:
-    let
-      systems = [
-        "aarch64-linux"
-        "x86_64-linux"
-        "aarch64-darwin"
-        "x86_64-darwin"
-      ];
+  outputs = inputs @ {
+    self,
+    ci,
+    ...
+  }: let
+    systems = [
+      "aarch64-linux"
+      "x86_64-linux"
+      "aarch64-darwin"
+      "x86_64-darwin"
+    ];
 
-      hydraSystems = [
-        "aarch64-linux"
-        "x86_64-linux"
-      ];
-      forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
-      forEachHydraSystem = inputs.nixpkgs.lib.genAttrs hydraSystems;
+    hydraSystems = [
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
+    forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
+    forEachHydraSystem = inputs.nixpkgs.lib.genAttrs hydraSystems;
 
-      fontDefs = [
-        { name = "sf-pro";      pkgName = "SF Pro Fonts.pkg";      input = inputs.sf-pro; }
-        { name = "sf-compact";  pkgName = "SF Compact Fonts.pkg";  input = inputs.sf-compact; }
-        { name = "sf-mono";     pkgName = "SF Mono Fonts.pkg";     input = inputs.sf-mono; }
-        { name = "sf-arabic";   pkgName = "SF Arabic Fonts.pkg";   input = inputs.sf-arabic; }
-        { name = "sf-armenian"; pkgName = "SF Armenian Fonts.pkg"; input = inputs.sf-armenian; }
-        { name = "sf-georgian"; pkgName = "SF Georgian Fonts.pkg"; input = inputs.sf-georgian; }
-        { name = "sf-hebrew";   pkgName = "SF Hebrew Fonts.pkg";   input = inputs.sf-hebrew; }
-        { name = "ny";          pkgName = "NY Fonts.pkg";          input = inputs.ny; }
-      ];
+    fontDefs = [
+      {
+        name = "sf-pro";
+        pkgName = "SF Pro Fonts.pkg";
+        input = inputs.sf-pro;
+      }
+      {
+        name = "sf-compact";
+        pkgName = "SF Compact Fonts.pkg";
+        input = inputs.sf-compact;
+      }
+      {
+        name = "sf-mono";
+        pkgName = "SF Mono Fonts.pkg";
+        input = inputs.sf-mono;
+      }
+      {
+        name = "sf-arabic";
+        pkgName = "SF Arabic Fonts.pkg";
+        input = inputs.sf-arabic;
+      }
+      {
+        name = "sf-armenian";
+        pkgName = "SF Armenian Fonts.pkg";
+        input = inputs.sf-armenian;
+      }
+      {
+        name = "sf-georgian";
+        pkgName = "SF Georgian Fonts.pkg";
+        input = inputs.sf-georgian;
+      }
+      {
+        name = "sf-hebrew";
+        pkgName = "SF Hebrew Fonts.pkg";
+        input = inputs.sf-hebrew;
+      }
+      {
+        name = "ny";
+        pkgName = "NY Fonts.pkg";
+        input = inputs.ny;
+      }
+    ];
 
-      makeFontPackages =
-        callPackage:
-        builtins.foldl' (
-          acc: f:
+    makeFontPackages = callPackage:
+      builtins.foldl' (
+        acc: f:
           acc
           // {
-            ${f.name} = callPackage ./fontPackage.nix { inherit (f) name pkgName; src = f.input; nerd = false; };
-            "${f.name}-nerd" = callPackage ./fontPackage.nix { inherit (f) pkgName; name = "${f.name}-nerd"; src = f.input; nerd = true; };
+            ${f.name} = callPackage ./fontPackage.nix {
+              inherit (f) name pkgName;
+              src = f.input;
+              nerd = false;
+            };
+            "${f.name}-nerd" = callPackage ./fontPackage.nix {
+              inherit (f) pkgName;
+              name = "${f.name}-nerd";
+              src = f.input;
+              nerd = true;
+            };
           }
-        ) { } fontDefs;
-    in
-    {
-      overlays.default = final: _prev: makeFontPackages final.callPackage;
+      ) {}
+      fontDefs;
+  in {
+    overlays.default = final: _prev: makeFontPackages final.callPackage;
 
-      packages = forEachSystem (
-        system:
-        let
-          pkgs = inputs.nixpkgs.legacyPackages.${system};
-        in
+    packages = forEachSystem (
+      system: let
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
+      in
         makeFontPackages pkgs.callPackage
         // {
           hydra-spec = ci.lib.mkHydraSpec {
@@ -98,12 +139,11 @@
             checks = self.checks;
           };
         }
-      );
-      checks = forEachHydraSystem (
-        system:
-        let
-          pkgs = inputs.nixpkgs.legacyPackages.${system};
-        in
+    );
+    checks = forEachHydraSystem (
+      system: let
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
+      in
         # All packages become checks so Hydra builds every font.
         # The ci-specific entries override the package versions with
         # proper check derivations.
@@ -120,6 +160,6 @@
             mergifyFile = ./.mergify.yml;
           };
         }
-      );
-    };
+    );
+  };
 }
