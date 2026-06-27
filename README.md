@@ -7,6 +7,17 @@
 >[!Tip]
 > Packages are also provided that automatically patch the fonts with the [nerd font patcher](https://github.com/ryanoasis/nerd-fonts). This provides a font that includes the most common symbols, suitable for use in the terminal, statusbars, etc.
 
+## OVERLAY
+
+An overlay is provided under `overlays.default`, allowing you to add the font packages to your own nixpkgs instance:
+
+```nix
+nixpkgs.overlays = [ apple-fonts.overlays.default ];
+
+# Packages are then available as pkgs attributes:
+# pkgs.sf-pro, pkgs.sf-mono-nerd, pkgs.ny, etc.
+```
+
 ## CONFIGURATION EXAMPLE
 
 ```nix
