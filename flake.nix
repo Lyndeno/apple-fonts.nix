@@ -54,36 +54,38 @@
       ];
       forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
       forEachHydraSystem = inputs.nixpkgs.lib.genAttrs hydraSystems;
+
+      fontDefs = [
+        { name = "sf-pro";      pkgName = "SF Pro Fonts.pkg";      input = inputs.sf-pro; }
+        { name = "sf-compact";  pkgName = "SF Compact Fonts.pkg";  input = inputs.sf-compact; }
+        { name = "sf-mono";     pkgName = "SF Mono Fonts.pkg";     input = inputs.sf-mono; }
+        { name = "sf-arabic";   pkgName = "SF Arabic Fonts.pkg";   input = inputs.sf-arabic; }
+        { name = "sf-armenian"; pkgName = "SF Armenian Fonts.pkg"; input = inputs.sf-armenian; }
+        { name = "sf-georgian"; pkgName = "SF Georgian Fonts.pkg"; input = inputs.sf-georgian; }
+        { name = "sf-hebrew";   pkgName = "SF Hebrew Fonts.pkg";   input = inputs.sf-hebrew; }
+        { name = "ny";          pkgName = "NY Fonts.pkg";          input = inputs.ny; }
+      ];
+
+      makeFontPackages =
+        callPackage:
+        builtins.foldl' (
+          acc: f:
+          acc
+          // {
+            ${f.name} = callPackage ./fontPackage.nix { inherit (f) name pkgName; src = f.input; nerd = false; };
+            "${f.name}-nerd" = callPackage ./fontPackage.nix { inherit (f) pkgName; name = "${f.name}-nerd"; src = f.input; nerd = true; };
+          }
+        ) { } fontDefs;
     in
     {
+      overlays.default = final: _prev: makeFontPackages final.callPackage;
+
       packages = forEachSystem (
         system:
         let
           pkgs = inputs.nixpkgs.legacyPackages.${system};
-
-          #makeAppleFont =
-          #  name: pkgName: src: nerd:
-          #  ;
-
-          fontDefs = [
-            { name = "sf-pro";      pkgName = "SF Pro Fonts.pkg";      input = inputs.sf-pro; }
-            { name = "sf-compact";  pkgName = "SF Compact Fonts.pkg";  input = inputs.sf-compact; }
-            { name = "sf-mono";     pkgName = "SF Mono Fonts.pkg";     input = inputs.sf-mono; }
-            { name = "sf-arabic";   pkgName = "SF Arabic Fonts.pkg";   input = inputs.sf-arabic; }
-            { name = "sf-armenian"; pkgName = "SF Armenian Fonts.pkg"; input = inputs.sf-armenian; }
-            { name = "sf-georgian"; pkgName = "SF Georgian Fonts.pkg"; input = inputs.sf-georgian; }
-            { name = "sf-hebrew";   pkgName = "SF Hebrew Fonts.pkg";   input = inputs.sf-hebrew; }
-            { name = "ny";          pkgName = "NY Fonts.pkg";          input = inputs.ny; }
-          ];
         in
-        pkgs.lib.foldl' (
-          acc: f:
-          acc
-          // {
-            ${f.name} = pkgs.callPackage ./fontPackage.nix { inherit (f) name pkgName; src = f.input; nerd = false; };
-            "${f.name}-nerd" = pkgs.callPackage ./fontPackage.nix { inherit (f) pkgName; name = "${f.name}-nerd"; src = f.input; nerd = true; };
-          }
-        ) { } fontDefs
+        makeFontPackages pkgs.callPackage
         // {
           hydra-spec = ci.lib.mkHydraSpec {
             inherit pkgs;
