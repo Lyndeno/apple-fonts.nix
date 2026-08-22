@@ -50,12 +50,7 @@
       "x86_64-darwin"
     ];
 
-    hydraSystems = [
-      "aarch64-linux"
-      "x86_64-linux"
-    ];
     forEachSystem = inputs.nixpkgs.lib.genAttrs systems;
-    forEachHydraSystem = inputs.nixpkgs.lib.genAttrs hydraSystems;
 
     fontDefs = [
       {
@@ -136,11 +131,11 @@
           mergify = ci.lib.mkMergifyConfig {
             inherit pkgs;
             projectName = "apple-fonts";
-            checks = self.checks;
+            checks = self.hydraJobs;
           };
         }
     );
-    checks = forEachHydraSystem (
+    checks = forEachSystem (
       system: let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
       in
@@ -161,5 +156,9 @@
           };
         }
     );
+
+    hydraJobs = {
+      inherit (self.checks) x86_64-linux aarch64-linux;
+    };
   };
 }
