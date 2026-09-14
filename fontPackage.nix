@@ -12,8 +12,10 @@
   unpackPhase = pkgName: ''
     runHook preUnpack
     7z x $src
-    7z x './*/${pkgName}'
-    7z x 'Payload~'
+    if [ ! -f 'Payload~' ]; then
+      7z x './*/${pkgName}'
+    fi
+    7z x -tcpio 'Payload~'
     runHook postUnpack
   '';
 

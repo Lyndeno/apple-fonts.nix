@@ -50,12 +50,12 @@
     fontDefs = [
       {
         name = "sf-pro";
-        pkgName = "SF Pro Fonts.pkg";
+        pkgName = "SFProFontsPackage.pkg";
         input = inputs.sf-pro;
       }
       {
         name = "sf-compact";
-        pkgName = "SF Compact Fonts.pkg";
+        pkgName = "SFCompactFontsPackage.pkg";
         input = inputs.sf-compact;
       }
       {
